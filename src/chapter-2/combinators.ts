@@ -1,15 +1,16 @@
+import { AnyFunc } from "../common/function-types";
+
 // Page 23
-export function composeOne<T, O>(f: (output: O) => T, g: (...args: any[]) => O) {
-  return (...args: any[]) => f(g(...args));
+export function composeOne<T, O>(f: (output: O) => T, g: AnyFunc) {
+  return (...args: T[]) => f(g(...args));
 }
 
 // Page 24 - the only difference is f has an indefinite arity
 // If f is expecting an array as an argument, it will automatically be spread. This seems like an issue.
-export function composeTwo<T, O extends any[]>(f: (...args: any[]) => T, g: (...args: any[]) => O) {
+export function composeTwo<T, O extends any[]>(f: AnyFunc<any, T>, g: AnyFunc<any, O>) {
   return (...args: any[]) => (f(...g(...args)));
 }
 
-// Simple function that allows the accumulation of results
 export function identity(x: number) {
   return x;
 }
@@ -24,11 +25,13 @@ export function iterateN(n: number, f: (m: number) => number): (acc: number) => 
 }
 
 // Page 26
-export function parallelCombine<T, P, O>(h: (one: P, two: O) => T, f: (...args: any[]) => P, g: (...args: any[]) => O) {
+export function parallelCombine<T, P, O>(h: (one: P, two: O) => T, f: AnyFunc<any, P>, g: AnyFunc<any, O>) {
   return (...args: any[]) => h(f(args), g(args));
 }
 
 // Page 27
+// Considered not a good implementation. 
+// Combination does not have a well defined numerical arity. So it can't be passed to a function that needs it's arity.
 export function spreadCombineOne<T, P, O>(h: (one: P, two: O) => T, f: (...args: any[]) => P, g: (...args: any[]) => O) {
   const fArity = f.length;
 
@@ -37,6 +40,26 @@ export function spreadCombineOne<T, P, O>(h: (one: P, two: O) => T, f: (...args:
     const gArgs = args.slice(fArity);
 
     return h(f(...fArgs), g(...gArgs));
+  }
+
+  return combination
+}
+
+// Helper function that cuts off any extra arguments.
+export function restrictArity<T, O>(fn: (...args: T[]) => O, n: number) {
+  return (...args: T[]) => fn(...args.slice(0, n))
+}
+
+export function spreadCombineTwo(h, f, g) {
+  const n = f.length;
+  const m = g.length;
+  const t = n + m;
+
+  const combination = (...args: any[]) => {
+    const fArgs = args.slice(n);
+    const gArgs = args.slice(n, m);
+
+    return restrictArity(h(f(...fArgs), g(...gArgs)), t)
   }
 
   return combination

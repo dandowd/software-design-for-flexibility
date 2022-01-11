@@ -1,4 +1,4 @@
-import { composeOne, composeTwo, iterateN, parallelCombine, spreadCombineOne } from "../combinators";
+import { composeOne, composeTwo, iterateN, parallelCombine, restrictArity, spreadCombineOne } from "../combinators";
 
 test('first compose should combine functions', () => {
   const sqr = (x: number): number => {
@@ -67,4 +67,14 @@ test('spread combine one', () => {
   const combined = spreadCombineOne(h, f, g)('fOne', 'gOne', 'gTwo');
 
   expect(combined).toBe('fOne gOne gTwo');
+});
+
+test('restrict arity should remove unused args', () => {
+  const sum = (...args: number[]) => {
+    return args.reduce((acc, n) => acc + n, 0);
+  };
+
+  const restricted = restrictArity(sum, 2)(2, 2, 2);
+  
+  expect(restricted).toBe(4)
 });
