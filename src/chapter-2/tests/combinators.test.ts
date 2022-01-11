@@ -74,7 +74,15 @@ test('restrict arity should remove unused args', () => {
     return args.reduce((acc, n) => acc + n, 0);
   };
 
-  const restricted = restrictArity(sum, 2)(2, 2, 2);
+  const restricted = restrictArity(sum, 2)(2, 2);
   
   expect(restricted).toBe(4)
+});
+
+test('restrict arity should throw an error', () => {
+  const sum = (...args: number[]) => {
+    return args.reduce((acc, n) => acc + n, 0);
+  };
+
+  expect(() => restrictArity(sum, 2)(2, 2, 2)).toThrowError();
 });

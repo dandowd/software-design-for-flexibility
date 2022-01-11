@@ -66,12 +66,28 @@ export function restrictArity(fn: AnyFunc, nargs: number) {
     }
   }
 
-  return fn;
+  return (...args: any[]) => {
+    if (args.length !== getArity(fn)) {
+      throw new Error('Incorrect arity');
+    }
+
+    return fn(...args);
+  };
+}
+
+export function getArity(fn: AnyFunc) {
+  const context = global || window as any;
+
+  if (!context.arityTable || !context.arityTable[fn.name]) {
+    return fn.length;
+  } 
+
+  return context.arityTable[fn.name];
 }
 
 export function spreadCombineTwo(h: AnyFunc, f: AnyFunc, g: AnyFunc) {
-  const n = f.length;
-  const m = g.length;
+  const n = getArity(f);
+  const m = getArity(g);
   const t = n + m;
 
   const combination = (...args: any[]) => {
