@@ -46,11 +46,30 @@ export function spreadCombineOne<T, P, O>(h: (one: P, two: O) => T, f: (...args:
 }
 
 // Helper function that cuts off any extra arguments.
-export function restrictArity<T, O>(fn: (...args: T[]) => O, n: number) {
-  return (...args: T[]) => fn(...args.slice(0, n))
+// Not sure if this has much use in Javascript since functions can execute with extra args.
+// export function restrictArity<T, O>(fn: (...args: T[]) => O, n: number) {
+//   return (...args: T[]) => fn(...args.slice(0, n))
+// }
+
+// I'm not an expert in Scheme, but it looks like the book is using a global hash-table.
+export function restrictArity(fn: AnyFunc, nargs: number) {
+  const context = global || window as any;
+  
+  if (!context.arityTable) {
+    context.arityTable = {
+      [fn.name]: nargs
+    }
+  } else {
+    context.arityTable = {
+      ...context.arityTable,
+      [fn.name]: nargs
+    }
+  }
+
+  return fn;
 }
 
-export function spreadCombineTwo(h, f, g) {
+export function spreadCombineTwo(h: AnyFunc, f: AnyFunc, g: AnyFunc) {
   const n = f.length;
   const m = g.length;
   const t = n + m;
