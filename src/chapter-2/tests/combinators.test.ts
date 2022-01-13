@@ -38,11 +38,14 @@ test('parallel combine', () => {
     expirationDays: 0,
   };
 
-  const isEdible = (food) => food.type === 'pizza';
+  const isEdible = (foodItem: any) => foodItem.type === 'pizza';
 
-  const isExpired = (food) => food.expirationDays;
+  const isExpired = (foodItem: any) => foodItem.expirationDays;
 
-  const shouldEat = (isEdible: boolean, isExpired: boolean) => isEdible && !isExpired;
+  const shouldEat = (
+    isFoodEdible: boolean,
+    isFoodExpired: boolean,
+  ) => isFoodEdible && !isFoodExpired;
 
   const combined = parallelCombine(shouldEat, isEdible, isExpired)(food);
 
